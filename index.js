@@ -13,7 +13,7 @@ const server = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'application/json');   
 
     switch (req.method) {
-        case 'GET':
+        case 'GET': 
             if (req.url === '/items') {   
                 fs.readFile(DATA_FILE, 'utf-8', (err, data) => {   //the server reads the items.json file and returns its contents
                     if (err) return sendError(res, 500, 'Could not read data');          
