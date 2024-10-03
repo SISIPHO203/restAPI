@@ -1,42 +1,41 @@
-const http = require('http');  //this module allows us to create http server
-const fs = require('fs');      //it reads and write files
-const path = require('path');       //helps in handling and transforming file paths
+const http = require('http');    
+const fs = require('fs');       
+const PORT = 3000;         
+const DATA_FILE = path.join(__dirname, 'items.json');    
 
-const PORT = 3000;          // port number the server will listen on
-const DATA_FILE = path.join(__dirname, 'items.json');    //it is the path to JSON file that will store the items
-
-const sendError = (res, statusCode, message) => {   //error responses it takes the response object,a status code and message
-    res.writeHead(statusCode);                      //writes status code to the response
-    res.end(JSON.stringify({ error: message }));     //sends JSON object with the error message
+const sendError = (res, statusCode, message) => {  
+    res.writeHead(statusCode);                      
+    res.end(JSON.stringify({ error: message }));    
 };
 
-const server = http.createServer((req, res) => {       //takes callback function that gets executed on every incoming request and response
-    res.setHeader('Content-Type', 'application/json');   //the Content-type header is set to application/json to indidcate that the server will return JSON data
+const server = http.createServer((req, res) => {     
+    res.setHeader('Content-Type', 'application/json');   
 
     switch (req.method) {
         case 'GET':
-            if (req.url === '/items') {      //when request is made to /items ,
+            if (req.url === '/items') {   
                 fs.readFile(DATA_FILE, 'utf-8', (err, data) => {   //the server reads the items.json file and returns its contents
-                    if (err) return sendError(res, 500, 'Could not read data');            //if error occurs it sends status code and error message
+                    if (err) return sendError(res, 500, 'Could not read data');          
                     res.writeHead(200);
                     res.end(data);
                 });
             } else {
                 sendError(res, 404, 'Not Found');
             }
+            
             break;
 
         case 'POST':
             if (req.url === '/items') { 
                 let body = '';
-                req.on('data', chunk => body += chunk.toString());//server listens fore data chunks, concantinates rhem 
+                req.on('data', chunk => body += chunk.toString());  
                 req.on('end', () => {
                     try {
-                        const newItem = JSON.parse(body);//attempts to parse the body as JSON
+                        const newItem = JSON.parse(body);    
                         fs.readFile(DATA_FILE, 'utf-8', (err, data) => {
                             if (err) return sendError(res, 500, 'Could not read data');
                             const items = JSON.parse(data);
-                            items.push(newItem);///IF SUCCESSFUL IT ADDS THE NEW ITEMS TO THE EXISTING LIST
+                            items.push(newItem);     
                             fs.writeFile(DATA_FILE, JSON.stringify(items), (err) => {
                                 if (err) return sendError(res, 500, 'Could not save data');
                                 res.writeHead(201);
@@ -44,7 +43,7 @@ const server = http.createServer((req, res) => {       //takes callback function
                             });
                         });
                     } catch {
-                        sendError(res, 400, 'Invalid JSON');// if not it sends a 400 status code
+                        sendError(res, 400, 'Invalid JSON');
                     }
                 });
             } else {
@@ -53,8 +52,8 @@ const server = http.createServer((req, res) => {       //takes callback function
             break;
 
         case 'PUT':
-            if (req.url.startsWith('/items/')) {//requests to update an item, the server extracts the item ID from the URL
-                const id = req.url.split('/')[2];// READS THE EXISTING items, updates the item and the specified index
+            if (req.url.startsWith('/items/')) {  
+                const id = req.url.split('/')[2];    // READS THE EXISTING items, updates the item and the specified index
                 let body = '';
                 req.on('data', chunk => body += chunk.toString());
                 req.on('end', () => {
@@ -69,7 +68,7 @@ const server = http.createServer((req, res) => {       //takes callback function
                             fs.writeFile(DATA_FILE, JSON.stringify(items), (err) => {
                                 if (err) return sendError(res, 500, 'Could not save data');
                                 res.writeHead(200);
-                                res.end(JSON.stringify(updatedItem));//writes the new list back to the file
+                                res.end(JSON.stringify(updatedItem));    //writes the new list back to the file
                             });
                         });
                     } catch {
@@ -82,8 +81,8 @@ const server = http.createServer((req, res) => {       //takes callback function
             break;
 
         case 'DELETE':
-            if (req.url.startsWith('/items/')) {//the server finds and 
-                const id = req.url.split('/')[2];//removes the specified item from the list 
+            if (req.url.startsWith('/items/')) {  //the server finds and 
+                const id = req.url.split('/')[2];  //removes the specified item from the list 
                 fs.readFile(DATA_FILE, 'utf-8', (err, data) => {
                     if (err) return sendError(res, 500, 'Could not read data');
                     const items = JSON.parse(data);
@@ -93,19 +92,27 @@ const server = http.createServer((req, res) => {       //takes callback function
                     fs.writeFile(DATA_FILE, JSON.stringify(items), (err) => {
                         if (err) return sendError(res, 500, 'Could not save data');
                         res.writeHead(204);
-                        res.end();//updates the file accordingly
+                        res.end();    //updates the file accordingly
                     });
                 });
             } else {
                 sendError(res, 404, 'Not Found');
             }
             break;
-
+ 
         default:
-            sendError(res, 405, 'Method Not Allowed');// it responds with status code indicating that the method is not allowed
+            sendError(res, 405, 'Method Not Allowed');   // it responds with status code indicating that the method is not allowed
     }
 });
 
 server.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);// server starts listening on the specified port, a message is logged to the console to indicate thet the server is running
+    console.log(`Server is running on http://localhost:${PORT}`);  // server starts listening on the specified port, a message is logged to the console to indicate thet the server is running
 });
+
+
+
+
+
+
+
+
