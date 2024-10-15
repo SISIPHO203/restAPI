@@ -6,10 +6,10 @@ This REST API is designed for a fruit farm to manage and record the types of fru
 
 ## Features
 
-- Retrieve a list of harvested fruits
-- Add new fruit entries
-- Update existing fruit entries
-- Delete fruit entries
+- Retrieve a list of harvested fruits using the GET method
+- Add new fruit entries using POST method
+- Update existing fruit entries using PUT method
+- Delete fruit entries using DELETE method
 
 
 
